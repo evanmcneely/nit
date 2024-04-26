@@ -1,4 +1,4 @@
-package review
+package nit
 
 import (
 	goanthropic "github.com/madebywelch/anthropic-go/v2/pkg/anthropic"

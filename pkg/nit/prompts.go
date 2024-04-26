@@ -1,4 +1,4 @@
-package review
+package nit
 
 const reviewCommentsPrompt = `%s
 

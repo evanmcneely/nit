@@ -1,4 +1,4 @@
-package review
+package nit
 
 import (
 	"encoding/json"
