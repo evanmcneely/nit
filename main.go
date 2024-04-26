@@ -1,7 +1,11 @@
 package main
 
-import "github.com/evanmcneely/nit/pkg/nit"
-
 func main() {
-  nit.Start()
+	print("hello")
+	// At somepoint this will be a simple server that responds to webhooks
+	// TODO:
+	//  - config environment variables
+	//  - init AI providers
+	//  - init Github client
+	//  - register webhook endpoind with handlers
 }
