@@ -9,7 +9,7 @@ import (
 
 const maxReviewAttempts = 3
 
-func ShouldReviewPullRequest(e *github.PullRequestEvent) (bool, string) {
+func ShouldReviewPullRequest(e *github.PullRequestEvent, c *Config) (bool, string) {
 	var (
 		author      = e.GetPullRequest().GetUser().GetLogin()
 		action      = e.GetAction()
@@ -28,6 +28,10 @@ func ShouldReviewPullRequest(e *github.PullRequestEvent) (bool, string) {
 	// prevent it from being revieed by this app
 	case strings.Contains(description, "ai-review:ignore"):
 		return false, "pull request marked as ignore"
+	// the ai-review:please string must be added to PR descriptions by a dev when
+	// OptIn is set to true
+	case c.OptIn && !strings.Contains(description,  "ai-review:please"):
+		return false, "review not requested when opt-in is enabled"
 	default:
 		return true, ""
 	}

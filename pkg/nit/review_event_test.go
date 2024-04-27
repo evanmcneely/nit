@@ -25,7 +25,23 @@ func TestShouldReviewPullRequest(t *testing.T) {
 			},
 		}
 
-		ok, _ := ShouldReviewPullRequest(event)
+		ok, _ := ShouldReviewPullRequest(event, &Config{OptIn: false})
+		assert.False(t, ok)
+	})
+
+	t.Run("should ignore pull requests when opt-in is true and the review is not requested", func(t *testing.T) {
+		event := &github.PullRequestEvent{
+			Action: github.String("opened"),
+			PullRequest: &github.PullRequest{
+				Body:  github.String("body"),
+				Title: github.String("title"),
+				User: &github.User{
+					Login: github.String("something"),
+				},
+			},
+		}
+
+		ok, _ := ShouldReviewPullRequest(event, &Config{OptIn: true})
 		assert.False(t, ok)
 	})
 
@@ -68,7 +84,7 @@ func TestShouldReviewPullRequest(t *testing.T) {
 
 		for _, action := range ignoredActions {
 			event := createEvent(action)
-			ok, _ := ShouldReviewPullRequest(event)
+			ok, _ := ShouldReviewPullRequest(event, &Config{OptIn: false})
 			assert.False(t, ok)
 		}
 	})
@@ -85,7 +101,7 @@ func TestShouldReviewPullRequest(t *testing.T) {
 			},
 		}
 
-		ok, _ := ShouldReviewPullRequest(event)
+		ok, _ := ShouldReviewPullRequest(event, &Config{OptIn: false})
 		assert.False(t, ok)
 	})
 }

@@ -19,11 +19,12 @@ func main() {
 	}
 
 	// Initialize AI providers
-	openai := nit.NewOpenAI(config.AI.OpenaiKey)
+	openai := nit.NewOpenAI(config.App.OpenaiKey)
 	ai := nit.NewAI(openai, openai)
 
 	// Initialize Github client
 	gh := github.NewClient(nil)
+
 
 	// Define the handler function.
 	http.HandleFunc("webhook/github", HandleGithubEvents(&config, ai, gh))
@@ -38,13 +39,18 @@ func main() {
 
 // Handle Github webhook events for Pull Requests and Pull Request Comments
 func HandleGithubEvents(c *config.Config, ai *nit.AI, gh *github.Client) http.HandlerFunc {
+	webhookConfig := &nit.Config{
+		OptIn: c.Review.OptIn,
+		AppName: c.Review.Name,
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
 
-		payload, err := github.ValidatePayload(r, []byte(c.Github.WebhookSecret))
+		payload, err := github.ValidatePayload(r, []byte(c.App.WebhookSecret))
 		if err != nil {
 			log.Printf("could not validate payload: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -63,7 +69,7 @@ func HandleGithubEvents(c *config.Config, ai *nit.AI, gh *github.Client) http.Ha
 
 		switch event := event.(type) {
 		case *github.PullRequestEvent:
-			if ok, reason := nit.ShouldReviewPullRequest(event); !ok {
+			if ok, reason := nit.ShouldReviewPullRequest(event, webhookConfig); !ok {
 				log.Printf("not reviewing pull request because: %v", reason)
 			}
 			err = nit.ReviewPullRequest(event, ai, gh)
@@ -71,10 +77,10 @@ func HandleGithubEvents(c *config.Config, ai *nit.AI, gh *github.Client) http.Ha
 				log.Printf("error reviewing pull request: %v", err)
 			}
 		case *github.PullRequestReviewCommentEvent:
-			if ok, reason := nit.ShouldRespondToComment(event, gh, c.App.Name); !ok {
+			if ok, reason := nit.ShouldRespondToComment(event, gh, webhookConfig); !ok {
 				log.Printf("not replying to comment because: %v", reason)
 			}
-			err = nit.RespondToComment(event, c.App.Name, ai, gh)
+			err = nit.RespondToComment(event, webhookConfig, ai, gh)
 			if err != nil {
 				log.Printf("error replying to comment: %v", err)
 			}

@@ -24,6 +24,11 @@ type AIProvider interface {
 	CreateCompletetion(req *completionRequest) (*completionResponse, error)
 }
 
+type Config struct {
+	OptIn bool
+	AppName string
+}
+
 type completionRequest struct {
 	Model  string
 	Prompt string

@@ -10,25 +10,22 @@ type (
 	// Config stores complete configuration
 	Config struct {
 		App    AppConfig
-		Github GithubConfig
-		AI     AIConfig
+		Review ReviewConfig
 	}
 
 	// AppConfig stores application configuration
 	AppConfig struct {
-		Name     string
-		Port     string
-		Hostname string
-	}
-
-	// GithubConfig stores the Github app config
-	GithubConfig struct {
+		Port          string
+		Hostname      string
 		WebhookSecret string
+		OpenaiKey     string
+		AnthropicKey  string
 	}
 
-	AIConfig struct {
-		OpenaiKey    string
-		AnthropicKey string
+	// Stores review specific data
+	ReviewConfig struct {
+		OptIn bool
+		Name  string
 	}
 )
 

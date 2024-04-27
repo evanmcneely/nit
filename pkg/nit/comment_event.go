@@ -10,7 +10,7 @@ import (
 
 const noreply = "noreply"
 
-func ShouldRespondToComment(e *github.PullRequestReviewCommentEvent, client *github.Client, app string) (bool, string) {
+func ShouldRespondToComment(e *github.PullRequestReviewCommentEvent, client *github.Client, config *Config) (bool, string) {
 	var (
 		action     = e.GetAction()
 		author     = e.GetComment().GetUser().GetLogin()
@@ -39,14 +39,14 @@ func ShouldRespondToComment(e *github.PullRequestReviewCommentEvent, client *git
 	}
 
 	origPoster := origComment.User.GetLogin()
-	if !strings.Contains(origPoster, app) {
+	if !strings.Contains(origPoster, config.AppName) {
 		return false, "comment is not in response to our app"
 	}
 
 	return true, ""
 }
 
-func RespondToComment(event *github.PullRequestReviewCommentEvent, app string, ai *AI, gh *github.Client) error {
+func RespondToComment(event *github.PullRequestReviewCommentEvent, config *Config, ai *AI, gh *github.Client) error {
 	var (
 		owner      = event.GetRepo().GetOwner().GetLogin()
 		repository = event.GetRepo().GetName()
@@ -65,7 +65,7 @@ func RespondToComment(event *github.PullRequestReviewCommentEvent, app string, a
 		body,
 		hunk,
 		comments,
-		app,
+		config.AppName,
 	)
 	if err != nil || reply == nil {
 		return err

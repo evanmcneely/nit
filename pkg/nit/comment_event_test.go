@@ -49,7 +49,7 @@ func TestShouldRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok, _ := ShouldRespondToComment(event, mockGh, appName)
+		ok, _ := ShouldRespondToComment(event, mockGh, &Config{AppName: appName})
 		assert.False(t, ok)
 	})
 
@@ -81,7 +81,7 @@ func TestShouldRespondToComment(t *testing.T) {
 
 		for _, action := range ignoredActions {
 			event := getIgonredEvent(action)
-			ok, _ := ShouldRespondToComment(event, mockGh, appName)
+			ok, _ := ShouldRespondToComment(event, mockGh,&Config{AppName: appName}) 
 			assert.False(t, ok)
 		}
 	})
@@ -105,7 +105,7 @@ func TestShouldRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok, _ := ShouldRespondToComment(event, mockGh, appName)
+		ok, _ := ShouldRespondToComment(event, mockGh, &Config{AppName: appName})
 		assert.False(t, ok)
 	})
 
@@ -128,7 +128,7 @@ func TestShouldRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok, _ := ShouldRespondToComment(event, mockGh, appName)
+		ok, _ := ShouldRespondToComment(event, mockGh, &Config{AppName: appName})
 		assert.False(t, ok)
 	})
 }
@@ -203,7 +203,7 @@ func TestRespondToComment(t *testing.T) {
 		}
 
 		// should return no errors
-		ok := RespondToComment(event, appName, mockAI, mockGithub)
+		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Nil(t, ok)
 
 		// assert that the payload "sent" to Github was formed properly
@@ -263,7 +263,7 @@ func TestRespondToComment(t *testing.T) {
 		}
 
 		// should return no errors
-		ok := RespondToComment(event, appName, mockAI, mockGithub)
+		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Nil(t, ok)
 	})
 
@@ -298,7 +298,7 @@ func TestRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok := RespondToComment(event, appName, mockAI, mockGithub)
+		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 
@@ -344,7 +344,7 @@ func TestRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok := RespondToComment(event, appName, mockAI, mockGithub)
+		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 
@@ -402,7 +402,7 @@ func TestRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok := RespondToComment(event, appName, mockAI, mockGithub)
+		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 }

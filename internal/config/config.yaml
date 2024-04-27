@@ -1,11 +1,12 @@
 app:
-  name: "nit"
   hostname: "localhost"
   port: "8080"
-
-ai:
   openaiKey: ""
   anthropicKey: ""
-
-github:
   webhookSecret: ""
+
+review:
+  optIn: false
+  name: "nit"
+
+
