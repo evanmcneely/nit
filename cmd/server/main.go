@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/evanmcneely/nit"
 	"github.com/evanmcneely/nit/internal/config"
-	"github.com/evanmcneely/nit/pkg/nit"
 	"github.com/google/go-github/v59/github"
 )
 
@@ -25,7 +25,6 @@ func main() {
 	// Initialize Github client
 	gh := github.NewClient(nil)
 
-
 	// Define the handler function.
 	http.HandleFunc("webhook/github", HandleGithubEvents(&config, ai, gh))
 
@@ -40,7 +39,7 @@ func main() {
 // Handle Github webhook events for Pull Requests and Pull Request Comments
 func HandleGithubEvents(c *config.Config, ai *nit.AI, gh *github.Client) http.HandlerFunc {
 	webhookConfig := &nit.Config{
-		OptIn: c.Review.OptIn,
+		OptIn:   c.Review.OptIn,
 		AppName: c.Review.Name,
 	}
 
