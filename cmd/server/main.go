@@ -23,10 +23,10 @@ func main() {
 	ai := nit.NewAI(openai, openai)
 
 	// Initialize Github client
-	gh := github.NewClient(nil)
+	gh := github.NewClient(nil).WithAuthToken(config.App.GithubToken)
 
 	// Define the handler function.
-	http.HandleFunc("webhook/github", HandleGithubEvents(&config, ai, gh))
+	http.HandleFunc("/webhooks/github", HandleGithubEvents(&config, ai, gh))
 
 	// Start the server
 	log.Printf("server starting on port %v...", config.App.Port)

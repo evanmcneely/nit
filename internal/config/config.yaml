@@ -1,9 +1,13 @@
 app:
   hostname: "localhost"
   port: "8080"
+  # API keys for AI service providers. Only provide keys for services you are using
   openaiKey: ""
   anthropicKey: ""
-  webhookSecret: ""
+  # Github webhook secret. Leave as null if no secret is used.
+  webhookSecret: null
+  # fine grained personal access token with read/write access to pull requests and read access to repository contents
+  githubToken: ""
 
 review:
   optIn: false

@@ -20,6 +20,7 @@ type (
 		WebhookSecret string
 		OpenaiKey     string
 		AnthropicKey  string
+		GithubToken   string
 	}
 
 	// Stores review specific data
