@@ -8,7 +8,7 @@ Nit is a web server that responds to Github webhook events. It will generate and
 
 You will need to deploy this project to a server - which ever way you like to do that - you do you. The entry point is `cmd/server/main.go`.
 
-#### Create webhook
+### Create webhook
 
 Add a webhook to the repository you would like generated reviews.
 
@@ -21,7 +21,7 @@ Add a webhook to the repository you would like generated reviews.
    - Webhook events = select individual events - `Pull requests` and `Pull request review comments`
 4. Click **Add webhook** when ready
 
-#### Generate access token
+### Generate access token
 
 Create a Github fine-grained access token for your account. I recommend creating the token at the Organization level if possible. Review will be posted on behalf of the account that the token belongs too.
 
@@ -31,7 +31,7 @@ Create a Github fine-grained access token for your account. I recommend creating
    - Read access to code and metadata
 3. Click **Generate token** when ready
 
-#### Set environment variables
+### Set environment variables
 
 Customize your server environment variables. You can edit the `config.yaml` file directly or set the environment variables yourself - which ever way you like to do that - you do you.
 
