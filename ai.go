@@ -21,11 +21,11 @@ const (
 // The interface that an AI provider (such as OpenAI or Anthropic) must implement to be used in this package.
 // Fulfilling this interface makes it easier to experiment with different AI providers.
 type AIProvider interface {
-	CreateCompletetion(req *completionRequest) (*completionResponse, error)
+	CreateCompletetion(req *completionRequest) (*CompletionResponse, error)
 }
 
 type Config struct {
-	OptIn bool
+	OptIn   bool
 	AppName string
 }
 
@@ -35,7 +35,7 @@ type completionRequest struct {
 	Format string
 }
 
-type completionResponse struct {
+type CompletionResponse struct {
 	Completion string
 	Tokens     int
 }
@@ -74,9 +74,9 @@ func (c *completion) ReturnText() *completion {
 	return c
 }
 
-func (c *completion) Create(prompt string) (*completionResponse, error) {
+func (c *completion) Create(prompt string) (*CompletionResponse, error) {
 	if prompt == "" {
-		return &completionResponse{}, errors.New("the prompt is empty. aborting completion")
+		return &CompletionResponse{}, errors.New("the prompt is empty. aborting completion")
 	}
 
 	req := completionRequest{
@@ -106,23 +106,25 @@ func (ai *AI) NewCompletion() *completion {
 // Creates a valid pull request review payload to be POSTed to the GitHub Rest API at /repos/{owner}/{repo}/pulls/{pull_number}/reviews.
 //
 // see https://docs.github.com/en/rest/pulls/reviews?apiVersion=2022-11-28#create-a-review-for-a-pull-request
-func (ai *AI) GeneratePullRequestReview(number int, title, description, prDiff string) (*github.PullRequestReviewRequest, error) {
+func (ai *AI) GeneratePullRequestReview(number int, title, description, prDiff string) (*github.PullRequestReviewRequest, int, error) {
 	notes, err := ai.generateReviewComments(number, title, description, prDiff)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	payload, _, err := ai.generateReviewBody(number, title, description, *notes)
+	payload, body, err := ai.generateReviewBody(number, title, description, *&notes.Completion)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	ai.fixProblemsWithPayload(prDiff, payload)
 
-	return payload, nil
+	tokens := body.Tokens + notes.Tokens
+
+	return payload, tokens, nil
 }
 
-func (ai *AI) generateReviewComments(number int, title, description, prDiff string) (*string, error) {
+func (ai *AI) generateReviewComments(number int, title, description, prDiff string) (*CompletionResponse, error) {
 	details := formatPullRequestDetails(number, title, description)
 	message := fmt.Sprintf(reviewCommentsPrompt, details, ai.addPositionNumbersToDiff(prDiff))
 
@@ -131,10 +133,10 @@ func (ai *AI) generateReviewComments(number int, title, description, prDiff stri
 		return nil, err
 	}
 
-	return &resp.Completion, nil
+	return resp, nil
 }
 
-func (ai *AI) generateReviewBody(number int, title, description, notes string) (*github.PullRequestReviewRequest, *string, error) {
+func (ai *AI) generateReviewBody(number int, title, description, notes string) (*github.PullRequestReviewRequest, *CompletionResponse, error) {
 	details := formatPullRequestDetails(number, title, description)
 	message := fmt.Sprintf(reviewPostBodyPrompt, details, notes)
 
@@ -150,12 +152,12 @@ func (ai *AI) generateReviewBody(number int, title, description, notes string) (
 		return nil, nil, err
 	}
 
-	return &payload, &resp.Completion, nil
+	return &payload, resp, nil
 }
 
 // Create a reply for thread of GitHub comments on a particular pull request hunk. The output of the
 // string "noreply" indicates that no reply should be made (ie. the conversation has reached an end).
-func (ai *AI) GenerateCommentReply(comment, hunk string, allComments []*github.PullRequestComment, name string) (*string, error) {
+func (ai *AI) GenerateCommentReply(comment, hunk string, allComments []*github.PullRequestComment, name string) (*CompletionResponse, error) {
 	thread := formatPullRequestComments(allComments)
 	message := fmt.Sprintf(commentReplyPrompt, comment, hunk, name, thread)
 
@@ -164,7 +166,7 @@ func (ai *AI) GenerateCommentReply(comment, hunk string, allComments []*github.P
 		return nil, err
 	}
 
-	return &resp.Completion, nil
+	return resp, nil
 }
 
 // Build a prompt snippet for the details of a pull request

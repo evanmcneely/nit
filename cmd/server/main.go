@@ -71,7 +71,7 @@ func HandleGithubEvents(c *config.Config, ai *nit.AI, gh *github.Client) http.Ha
 			if ok, reason := nit.ShouldReviewPullRequest(event, webhookConfig); !ok {
 				log.Printf("not reviewing pull request because: %v", reason)
 			}
-			err = nit.ReviewPullRequest(event, ai, gh)
+			_, err = nit.ReviewPullRequest(event, ai, gh)
 			if err != nil {
 				log.Printf("error reviewing pull request: %v", err)
 			}
@@ -79,7 +79,7 @@ func HandleGithubEvents(c *config.Config, ai *nit.AI, gh *github.Client) http.Ha
 			if ok, reason := nit.ShouldRespondToComment(event, gh, webhookConfig); !ok {
 				log.Printf("not replying to comment because: %v", reason)
 			}
-			err = nit.RespondToComment(event, webhookConfig, ai, gh)
+			_, err = nit.RespondToComment(event, webhookConfig, ai, gh)
 			if err != nil {
 				log.Printf("error replying to comment: %v", err)
 			}

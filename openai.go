@@ -21,7 +21,7 @@ func NewOpenAI(key string) *openAIProvider {
 	}
 }
 
-func (o *openAIProvider) CreateCompletetion(req *completionRequest) (*completionResponse, error) {
+func (o *openAIProvider) CreateCompletetion(req *completionRequest) (*CompletionResponse, error) {
 	model := o.getModel(req.Model)
 
 	openAiRequest := openai.ChatCompletionRequest{
@@ -47,7 +47,7 @@ func (o *openAIProvider) CreateCompletetion(req *completionRequest) (*completion
 		return nil, err
 	}
 
-	resp := &completionResponse{
+	resp := &CompletionResponse{
 		Completion: completion.Choices[0].Message.Content,
 		Tokens:     completion.Usage.TotalTokens,
 	}

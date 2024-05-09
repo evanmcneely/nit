@@ -10,6 +10,11 @@ import (
 
 const noreply = "noreply"
 
+type CommentResponse struct {
+	Tokens int
+	Id     int64
+}
+
 func ShouldRespondToComment(e *github.PullRequestReviewCommentEvent, client *github.Client, config *Config) (bool, string) {
 	var (
 		action     = e.GetAction()
@@ -46,7 +51,7 @@ func ShouldRespondToComment(e *github.PullRequestReviewCommentEvent, client *git
 	return true, ""
 }
 
-func RespondToComment(event *github.PullRequestReviewCommentEvent, config *Config, ai *AI, gh *github.Client) error {
+func RespondToComment(event *github.PullRequestReviewCommentEvent, config *Config, ai *AI, gh *github.Client) (*CommentResponse, error) {
 	var (
 		owner      = event.GetRepo().GetOwner().GetLogin()
 		repository = event.GetRepo().GetName()
@@ -58,7 +63,7 @@ func RespondToComment(event *github.PullRequestReviewCommentEvent, config *Confi
 
 	comments, err := getCommentsOnHunk(owner, repository, hunk, pr, gh)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	reply, err := ai.GenerateCommentReply(
@@ -68,24 +73,28 @@ func RespondToComment(event *github.PullRequestReviewCommentEvent, config *Confi
 		config.AppName,
 	)
 	if err != nil || reply == nil {
-		return err
+		return &CommentResponse{Tokens: reply.Tokens}, err
 	}
-	if *reply == noreply {
-		return nil
+	if reply.Completion == noreply {
+		return &CommentResponse{Tokens: reply.Tokens}, nil
 	}
 
-	_, _, err = gh.PullRequests.CreateCommentInReplyTo(
+	comment, _, err := gh.PullRequests.CreateCommentInReplyTo(
 		context.Background(),
 		owner,
 		repository,
 		pr,
-		*reply,
+		reply.Completion,
 		inReplyTo,
 	)
 	if err != nil {
-		return err
+		return &CommentResponse{Tokens: reply.Tokens}, err
 	}
-	return nil
+
+	return &CommentResponse{
+		Tokens: reply.Tokens,
+		Id:     comment.GetID(),
+	}, nil
 }
 
 func getCommentsOnHunk(owner, repo, hunk string, number int, gh *github.Client) ([]*github.PullRequestComment, error) {

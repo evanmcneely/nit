@@ -136,10 +136,10 @@ func TestReviewPullRequest(t *testing.T) {
 	}
 
 	t.Run("should return a generated review for a PR", func(t *testing.T) {
-		setupProviderMock := func(res ...*completionResponse) AIProviderMock {
+		setupProviderMock := func(res ...*CompletionResponse) AIProviderMock {
 			calls := 0
 			return AIProviderMock{
-				CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+				CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 					r := res[calls]
 					calls++
 					return r, nil
@@ -358,12 +358,12 @@ func TestReviewPullRequest(t *testing.T) {
 		for _, c := range tests {
 			mockProvider := setupProviderMock(
 				// return a mock response from generating review notes
-				&completionResponse{
+				&CompletionResponse{
 					Completion: mockNotes,
 					Tokens:     10,
 				},
 				// return a mock response from generating the review body
-				&completionResponse{
+				&CompletionResponse{
 					Completion: c.Payload,
 					Tokens:     20,
 				},
@@ -392,7 +392,7 @@ func TestReviewPullRequest(t *testing.T) {
 			)
 
 			// should return no errors
-			ok := ReviewPullRequest(event, mockAI, mockGithub)
+			_, ok := ReviewPullRequest(event, mockAI, mockGithub)
 			assert.Nil(t, ok)
 
 			// assert that the payload "sent" to Github was formed properly
@@ -421,13 +421,13 @@ func TestReviewPullRequest(t *testing.T) {
 	t.Run("should return AI provider errors when generating review notes", func(t *testing.T) {
 		mockGithub := github.NewClient(ghMock.NewMockedHTTPClient())
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 				return nil, errors.New("something happened")
 			},
 		}
 		mockAI := NewAI(&mockProvider, &mockProvider)
 
-		ok := ReviewPullRequest(event, mockAI, mockGithub)
+		_, ok := ReviewPullRequest(event, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 
@@ -435,12 +435,12 @@ func TestReviewPullRequest(t *testing.T) {
 		firstCallDone := false
 		mockGithub := github.NewClient(ghMock.NewMockedHTTPClient())
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 				if firstCallDone {
 					return nil, errors.New("something happened")
 				}
 				// return an error on the second call to the provider
-				return &completionResponse{
+				return &CompletionResponse{
 					Completion: mockNotes,
 					Tokens:     10,
 				}, nil
@@ -448,7 +448,7 @@ func TestReviewPullRequest(t *testing.T) {
 		}
 		mockAI := NewAI(&mockProvider, &mockProvider)
 
-		ok := ReviewPullRequest(event, mockAI, mockGithub)
+		_, ok := ReviewPullRequest(event, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 
@@ -468,8 +468,8 @@ func TestReviewPullRequest(t *testing.T) {
 		)
 		mockGithub := github.NewClient(mockedHTTPClient)
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
-				return &completionResponse{
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+				return &CompletionResponse{
 					Completion: "bla bla bla",
 					Tokens:     10,
 				}, nil
@@ -477,7 +477,7 @@ func TestReviewPullRequest(t *testing.T) {
 		}
 		mockAI := NewAI(&mockProvider, &mockProvider)
 
-		ok := ReviewPullRequest(event, mockAI, mockGithub)
+		_, ok := ReviewPullRequest(event, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 
@@ -504,9 +504,9 @@ func TestReviewPullRequest(t *testing.T) {
 		)
 		mockGithub := github.NewClient(mockedHTTPClient)
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 				// always return something successfully
-				return &completionResponse{
+				return &CompletionResponse{
 					Completion: "bla bla bla",
 					Tokens:     10,
 				}, nil
@@ -514,7 +514,7 @@ func TestReviewPullRequest(t *testing.T) {
 		}
 		mockAI := NewAI(&mockProvider, &mockProvider)
 
-		ok := ReviewPullRequest(event, mockAI, mockGithub)
+		_, ok := ReviewPullRequest(event, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 }

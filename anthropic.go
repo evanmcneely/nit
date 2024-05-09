@@ -21,7 +21,7 @@ func NewAnthropic(key string) *anthropicProvider {
 	}
 }
 
-func (a *anthropicProvider) CreateCompletetion(req *completionRequest) (*completionResponse, error) {
+func (a *anthropicProvider) CreateCompletetion(req *completionRequest) (*CompletionResponse, error) {
 	model := a.getModel(req.Model)
 
 	request := goanthropic.NewMessageRequest(
@@ -36,7 +36,7 @@ func (a *anthropicProvider) CreateCompletetion(req *completionRequest) (*complet
 		return nil, err
 	}
 
-	resp := &completionResponse{
+	resp := &CompletionResponse{
 		Completion: completion.Content[0].Text,
 		Tokens:     completion.Usage.InputTokens + completion.Usage.OutputTokens,
 	}

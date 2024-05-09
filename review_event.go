@@ -9,6 +9,11 @@ import (
 
 const maxReviewAttempts = 3
 
+type ReviewResponse struct {
+	Tokens int
+	Id     int64
+}
+
 func ShouldReviewPullRequest(e *github.PullRequestEvent, c *Config) (bool, string) {
 	var (
 		author      = e.GetPullRequest().GetUser().GetLogin()
@@ -30,14 +35,14 @@ func ShouldReviewPullRequest(e *github.PullRequestEvent, c *Config) (bool, strin
 		return false, "pull request marked as ignore"
 	// the ai-review:please string must be added to PR descriptions by a dev when
 	// OptIn is set to true
-	case c.OptIn && !strings.Contains(description,  "ai-review:please"):
+	case c.OptIn && !strings.Contains(description, "ai-review:please"):
 		return false, "review not requested when opt-in is enabled"
 	default:
 		return true, ""
 	}
 }
 
-func ReviewPullRequest(event *github.PullRequestEvent, ai *AI, gh *github.Client) error {
+func ReviewPullRequest(event *github.PullRequestEvent, ai *AI, gh *github.Client) (*ReviewResponse, error) {
 	var (
 		owner       = event.GetRepo().GetOwner().GetLogin()
 		repository  = event.GetRepo().GetName()
@@ -55,16 +60,16 @@ func ReviewPullRequest(event *github.PullRequestEvent, ai *AI, gh *github.Client
 		github.RawOptions{Type: github.Diff},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	body, err := ai.GeneratePullRequestReview(number, title, description, diff)
+	body, tokens, err := ai.GeneratePullRequestReview(number, title, description, diff)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// TODO: handle rate limit errors
-	_, _, err = gh.PullRequests.CreateReview(
+	review, _, err := gh.PullRequests.CreateReview(
 		context.Background(),
 		owner,
 		repository,
@@ -72,8 +77,11 @@ func ReviewPullRequest(event *github.PullRequestEvent, ai *AI, gh *github.Client
 		body,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &ReviewResponse{
+		Tokens: tokens,
+		Id:     review.GetID(),
+	}, nil
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestShouldRespondToComment(t *testing.T) {
 	const appName = "app"
 
@@ -81,7 +80,7 @@ func TestShouldRespondToComment(t *testing.T) {
 
 		for _, action := range ignoredActions {
 			event := getIgonredEvent(action)
-			ok, _ := ShouldRespondToComment(event, mockGh,&Config{AppName: appName}) 
+			ok, _ := ShouldRespondToComment(event, mockGh, &Config{AppName: appName})
 			assert.False(t, ok)
 		}
 	})
@@ -155,9 +154,9 @@ func TestRespondToComment(t *testing.T) {
 
 	t.Run("should reply to a comment in thread", func(t *testing.T) {
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 				// respond with the reply
-				return &completionResponse{Completion: reply, Tokens: 10}, nil
+				return &CompletionResponse{Completion: reply, Tokens: 10}, nil
 			},
 		}
 		mockAI := NewAI(&mockProvider, &mockProvider)
@@ -203,7 +202,7 @@ func TestRespondToComment(t *testing.T) {
 		}
 
 		// should return no errors
-		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
+		_, ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Nil(t, ok)
 
 		// assert that the payload "sent" to Github was formed properly
@@ -224,9 +223,9 @@ func TestRespondToComment(t *testing.T) {
 
 	t.Run("should not post a reply if the model doesn't want to", func(t *testing.T) {
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 				// respond with the reply
-				return &completionResponse{Completion: noreply, Tokens: 10}, nil
+				return &CompletionResponse{Completion: noreply, Tokens: 10}, nil
 			},
 		}
 		mockAI := NewAI(&mockProvider, &mockProvider)
@@ -263,14 +262,14 @@ func TestRespondToComment(t *testing.T) {
 		}
 
 		// should return no errors
-		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
+		_, ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Nil(t, ok)
 	})
 
 	t.Run("should return AI provider errors when generating reply fails", func(t *testing.T) {
 		mockGithub := github.NewClient(ghMock.NewMockedHTTPClient())
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 				return nil, errors.New("something happened")
 			},
 		}
@@ -298,7 +297,7 @@ func TestRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
+		_, ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 
@@ -344,7 +343,7 @@ func TestRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
+		_, ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 
@@ -370,9 +369,9 @@ func TestRespondToComment(t *testing.T) {
 
 		mockGithub := github.NewClient(mockedHTTPClient)
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*completionResponse, error) {
+			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
 				// always return something successfully
-				return &completionResponse{
+				return &CompletionResponse{
 					Completion: reply,
 					Tokens:     10,
 				}, nil
@@ -402,7 +401,7 @@ func TestRespondToComment(t *testing.T) {
 			},
 		}
 
-		ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
+		_, ok := RespondToComment(event, &Config{AppName: appName}, mockAI, mockGithub)
 		assert.Error(t, ok)
 	})
 }
