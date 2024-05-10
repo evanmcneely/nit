@@ -139,7 +139,7 @@ func TestReviewPullRequest(t *testing.T) {
 		setupProviderMock := func(res ...*CompletionResponse) AIProviderMock {
 			calls := 0
 			return AIProviderMock{
-				CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+				CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 					r := res[calls]
 					calls++
 					return r, nil
@@ -400,7 +400,7 @@ func TestReviewPullRequest(t *testing.T) {
 
 			// assert that the call to generate review notes is formed correctly
 			gotAI1 := mockProvider.calls.CreateCompletetion[0].Req
-			wantAI1 := &completionRequest{
+			wantAI1 := &CompletionRequest{
 				Prompt: fmt.Sprintf(reviewCommentsPrompt, formatPullRequestDetails(number, title, description), mockAI.addPositionNumbersToDiff(c.Diff)),
 				Model:  modelGood,
 				Format: formatText,
@@ -409,7 +409,7 @@ func TestReviewPullRequest(t *testing.T) {
 
 			// assert that the call to generate review payload is formed correctly
 			gotAI2 := mockProvider.calls.CreateCompletetion[1].Req
-			wantAI2 := &completionRequest{
+			wantAI2 := &CompletionRequest{
 				Prompt: fmt.Sprintf(reviewPostBodyPrompt, formatPullRequestDetails(number, title, description), mockNotes),
 				Model:  modelCheap,
 				Format: formatJSON,
@@ -421,7 +421,7 @@ func TestReviewPullRequest(t *testing.T) {
 	t.Run("should return AI provider errors when generating review notes", func(t *testing.T) {
 		mockGithub := github.NewClient(ghMock.NewMockedHTTPClient())
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				return nil, errors.New("something happened")
 			},
 		}
@@ -435,7 +435,7 @@ func TestReviewPullRequest(t *testing.T) {
 		firstCallDone := false
 		mockGithub := github.NewClient(ghMock.NewMockedHTTPClient())
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				if firstCallDone {
 					return nil, errors.New("something happened")
 				}
@@ -468,7 +468,7 @@ func TestReviewPullRequest(t *testing.T) {
 		)
 		mockGithub := github.NewClient(mockedHTTPClient)
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				return &CompletionResponse{
 					Completion: "bla bla bla",
 					Tokens:     10,
@@ -504,7 +504,7 @@ func TestReviewPullRequest(t *testing.T) {
 		)
 		mockGithub := github.NewClient(mockedHTTPClient)
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				// always return something successfully
 				return &CompletionResponse{
 					Completion: "bla bla bla",

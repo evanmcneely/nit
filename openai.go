@@ -21,7 +21,7 @@ func NewOpenAI(key string) *openAIProvider {
 	}
 }
 
-func (o *openAIProvider) CreateCompletetion(req *completionRequest) (*CompletionResponse, error) {
+func (o *openAIProvider) CreateCompletetion(req *CompletionRequest) (*CompletionResponse, error) {
 	model := o.getModel(req.Model)
 
 	openAiRequest := openai.ChatCompletionRequest{

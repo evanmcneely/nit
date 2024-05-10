@@ -21,7 +21,7 @@ const (
 // The interface that an AI provider (such as OpenAI or Anthropic) must implement to be used in this package.
 // Fulfilling this interface makes it easier to experiment with different AI providers.
 type AIProvider interface {
-	CreateCompletetion(req *completionRequest) (*CompletionResponse, error)
+	CreateCompletetion(req *CompletionRequest) (*CompletionResponse, error)
 }
 
 type Config struct {
@@ -29,7 +29,7 @@ type Config struct {
 	AppName string
 }
 
-type completionRequest struct {
+type CompletionRequest struct {
 	Model  string
 	Prompt string
 	Format string
@@ -79,7 +79,7 @@ func (c *completion) Create(prompt string) (*CompletionResponse, error) {
 		return &CompletionResponse{}, errors.New("the prompt is empty. aborting completion")
 	}
 
-	req := completionRequest{
+	req := CompletionRequest{
 		Model:  c.model,
 		Prompt: prompt,
 		Format: c.format,

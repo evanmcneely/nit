@@ -17,7 +17,7 @@ var _ AIProvider = &AIProviderMock{}
 //
 //		// make and configure a mocked AIProvider
 //		mockedAIProvider := &AIProviderMock{
-//			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+//			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 //				panic("mock out the CreateCompletetion method")
 //			},
 //		}
@@ -28,26 +28,26 @@ var _ AIProvider = &AIProviderMock{}
 //	}
 type AIProviderMock struct {
 	// CreateCompletetionFunc mocks the CreateCompletetion method.
-	CreateCompletetionFunc func(req *completionRequest) (*CompletionResponse, error)
+	CreateCompletetionFunc func(req *CompletionRequest) (*CompletionResponse, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// CreateCompletetion holds details about calls to the CreateCompletetion method.
 		CreateCompletetion []struct {
 			// Req is the req argument value.
-			Req *completionRequest
+			Req *CompletionRequest
 		}
 	}
 	lockCreateCompletetion sync.RWMutex
 }
 
 // CreateCompletetion calls CreateCompletetionFunc.
-func (mock *AIProviderMock) CreateCompletetion(req *completionRequest) (*CompletionResponse, error) {
+func (mock *AIProviderMock) CreateCompletetion(req *CompletionRequest) (*CompletionResponse, error) {
 	if mock.CreateCompletetionFunc == nil {
 		panic("AIProviderMock.CreateCompletetionFunc: method is nil but AIProvider.CreateCompletetion was just called")
 	}
 	callInfo := struct {
-		Req *completionRequest
+		Req *CompletionRequest
 	}{
 		Req: req,
 	}
@@ -62,10 +62,10 @@ func (mock *AIProviderMock) CreateCompletetion(req *completionRequest) (*Complet
 //
 //	len(mockedAIProvider.CreateCompletetionCalls())
 func (mock *AIProviderMock) CreateCompletetionCalls() []struct {
-	Req *completionRequest
+	Req *CompletionRequest
 } {
 	var calls []struct {
-		Req *completionRequest
+		Req *CompletionRequest
 	}
 	mock.lockCreateCompletetion.RLock()
 	calls = mock.calls.CreateCompletetion

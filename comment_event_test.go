@@ -154,7 +154,7 @@ func TestRespondToComment(t *testing.T) {
 
 	t.Run("should reply to a comment in thread", func(t *testing.T) {
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				// respond with the reply
 				return &CompletionResponse{Completion: reply, Tokens: 10}, nil
 			},
@@ -213,7 +213,7 @@ func TestRespondToComment(t *testing.T) {
 
 		// assert that the call to generate reply is formed correctly
 		gotAI := mockProvider.calls.CreateCompletetion[0].Req
-		wantAI := &completionRequest{
+		wantAI := &CompletionRequest{
 			Prompt: fmt.Sprintf(commentReplyPrompt, comment, hunk, appName, formatPullRequestComments(comments)),
 			Model:  modelGood,
 			Format: formatText,
@@ -223,7 +223,7 @@ func TestRespondToComment(t *testing.T) {
 
 	t.Run("should not post a reply if the model doesn't want to", func(t *testing.T) {
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				// respond with the reply
 				return &CompletionResponse{Completion: noreply, Tokens: 10}, nil
 			},
@@ -269,7 +269,7 @@ func TestRespondToComment(t *testing.T) {
 	t.Run("should return AI provider errors when generating reply fails", func(t *testing.T) {
 		mockGithub := github.NewClient(ghMock.NewMockedHTTPClient())
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				return nil, errors.New("something happened")
 			},
 		}
@@ -369,7 +369,7 @@ func TestRespondToComment(t *testing.T) {
 
 		mockGithub := github.NewClient(mockedHTTPClient)
 		mockProvider := AIProviderMock{
-			CreateCompletetionFunc: func(req *completionRequest) (*CompletionResponse, error) {
+			CreateCompletetionFunc: func(req *CompletionRequest) (*CompletionResponse, error) {
 				// always return something successfully
 				return &CompletionResponse{
 					Completion: reply,
